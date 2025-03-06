@@ -79,6 +79,25 @@ bool valid_move(vector<vector<int>>game_state, int row, int col){
     }
 }
 
+void bot_move_decide(vector<vector<int>> game_state, vector<int> &bot_move){
+    while(true){
+        int row = (rand() % (3));
+        int col = (rand() % (3));
+        if(valid_move(game_state, row, col)){
+             bot_move = {row, col};
+             break;
+        }else{
+            continue;
+        }
+    }
+   
+    
+}
+
+void bot_make_move(vector<vector<int>> &game_state, vector<int> &bot_move){
+    game_state[bot_move[0]][bot_move[1]] = 2;
+}
+
 
 int main(){
 vector<vector<int>>game_state;
@@ -86,7 +105,7 @@ clear_game(game_state);
 while(true){
         system("cls");
         int row = -1, col = -1;
-        char marker;
+        vector<int> bot_move= {2,2};
         print_game(game_state);
         if(check_win(game_state) != 0){
             cout << endl << "Winner is: " << convert(check_win(game_state)) << endl << "(c) to reset, (q) to quit: ";
@@ -100,11 +119,11 @@ while(true){
             }
         }
         while(true){
-            cout << "Enter Row, Col, x/o: " <<endl;
-            cin >> row >> col >> marker;
-            if((1 <= row && row <= 3) && (1 <= col && col <= 3) && (tolower(marker) == 'x' || tolower(marker) == 'o')){
+            cout << "Enter Row, Col: " <<endl;
+            cin >> row >> col;
+            if((1 <= row && row <= 3) && (1 <= col && col <= 3)){
                 if(valid_move(game_state, row-1, col-1)){
-                    add_move(game_state, row-1, col-1, convert(marker));
+                    add_move(game_state, row-1, col-1, 1);
                 }else{
                     cout << "invalid Move, Try Again\n";
                     continue;
@@ -117,6 +136,8 @@ while(true){
                 continue; 
             }
         }
+        bot_move_decide(game_state, bot_move);
+        bot_make_move(game_state, bot_move);
 }
 return 0; 
 }

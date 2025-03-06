@@ -64,6 +64,14 @@ void print_game(vector<vector<int>> game_state){
     cout << " " << "   1   2   3" << endl;
 }
 
+bool valid_move(vector<vector<int>>game_state, int row, int col){
+    if(game_state[row][col] == 0){
+        return true;
+    }else{
+        return false;
+    }
+}
+
 
 
 int main(){
@@ -85,10 +93,24 @@ while(true){
                 break;
             }
         }
-        cout << "Enter Row, Col, x/o: " <<endl;
-        cin >> row >> col >> marker;
-        add_move(game_state, row-1, col-1, convert(marker));
-    }
-
+        while(true){
+            cout << "Enter Row, Col, x/o: " <<endl;
+            cin >> row >> col >> marker;
+            if((1 <= row && row <= 3) && (1 <= col && col <= 3) && (tolower(marker) == 'x' || tolower(marker) == 'o')){
+                if(valid_move(game_state, row-1, col-1)){
+                    add_move(game_state, row-1, col-1, convert(marker));
+                }else{
+                    cout << "invalid Move, Try Again\n";
+                    continue;
+                }
+                break;
+            }else{
+                cout << "Invalid Input, Try Again\n";
+                cin.clear();
+                fflush(stdin);
+                continue; 
+            }
+        }
+}
 return 0; 
 }

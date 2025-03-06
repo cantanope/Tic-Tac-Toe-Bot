@@ -138,8 +138,10 @@ while(true){
                 continue; 
             }
         }
-        bot_move_decide(game_state, bot_move);
-        bot_make_move(game_state, bot_move);
+        if(check_win(game_state) == 0){
+            bot_move_decide(game_state, bot_move);
+            bot_make_move(game_state, bot_move);
+        }
 }
 return 0; 
 }

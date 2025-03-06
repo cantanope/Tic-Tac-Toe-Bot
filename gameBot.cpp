@@ -79,6 +79,7 @@ bool valid_move(vector<vector<int>>game_state, int row, int col){
     }
 }
 
+// Bot Brain, Decide what move to do next
 void bot_move_decide(vector<vector<int>> game_state, vector<int> &bot_move){
     while(true){
         int row = (rand() % (3));
@@ -94,6 +95,7 @@ void bot_move_decide(vector<vector<int>> game_state, vector<int> &bot_move){
     
 }
 
+// Arguments: Game state and Bot move (by refence) | Returns game state + bots move(by refrence)
 void bot_make_move(vector<vector<int>> &game_state, vector<int> &bot_move){
     game_state[bot_move[0]][bot_move[1]] = 2;
 }

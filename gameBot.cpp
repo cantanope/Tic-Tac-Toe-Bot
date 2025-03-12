@@ -23,7 +23,7 @@ int check_win(vector<vector<int>> game_state){
     if(game_state[1][1] != 0 && game_state[0][2] == game_state[1][1] && game_state[1][1] == game_state[2][0]){
         return game_state[1][1];
     }
-    return 0;;
+    return 0;
 }
 
 // Arguments: Game state (by refrence) Returns: Cleared game state (by refrence)
@@ -31,9 +31,9 @@ void clear_game(vector<vector<int>> &game_state){
     game_state = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
 }
 
-// Arguments: Game state (by refrence), position of move, 1 or 2 Returns: Updated game state (by refrence)
-void add_move(vector<vector<int>> &game_state, int row, int col, int player){
-    game_state[row][col] = player;
+// Arguments: Game state and Bot move (by refence) | Returns game state + bots move(by refrence)
+void add_move(vector<vector<int>> &game_state, vector<int> &bot_move){
+    game_state[bot_move[0]][bot_move[1]] = 2;
 }
 
 // Converts 0,1,2 into ' ', 'x', 'o'
@@ -79,25 +79,74 @@ bool valid_move(vector<vector<int>>game_state, int row, int col){
     }
 }
 
-// Bot Brain, Decide what move to do next
-void bot_move_decide(vector<vector<int>> game_state, vector<int> &bot_move){
-    while(true){
-        int row = (rand() % (3));
-        int col = (rand() % (3));
-        if(valid_move(game_state, row, col)){
-             bot_move = {row, col};
-             break;
-        }else{
-            continue;
+bool moves_left(vector<vector<int>> game_state){
+    for (int i = 0; i< 3; i++){
+        for (int j = 0; j<3; j++){
+            if (game_state[i][j]==0){ 
+                return true; 
+            }
         }
     }
-   
-    
+return false;
 }
 
-// Arguments: Game state and Bot move (by refence) | Returns game state + bots move(by refrence)
-void bot_make_move(vector<vector<int>> &game_state, vector<int> &bot_move){
-    game_state[bot_move[0]][bot_move[1]] = 2;
+int minimax(vector<vector<int>>game_state, int depth, bool is_max_player){
+    int state = check_win(game_state);
+    if(state == 2){
+        return 10 - depth;
+    }
+    if(state == 1){
+        return -10 + depth;
+    }
+    if(moves_left(game_state) == false){
+        return 0; 
+    }
+
+    if (is_max_player){
+        int best = -100;
+        for(int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                if(game_state[i][j] == 0){
+                    game_state[i][j] = 2; 
+                    best = max(best, (minimax(game_state, depth+1, !is_max_player)));
+                    game_state[i][j] = 0;
+                }
+            }
+        }
+        return best;
+    }else{
+        int best = 100;
+        for(int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                if(game_state[i][j] == 0){
+                    game_state[i][j] = 1; 
+                    best = min(best, (minimax(game_state, depth+1, !is_max_player)));
+                    game_state[i][j] = 0;
+                }
+            }
+        }
+        return best;
+    }
+}
+
+vector<int> find_best_move(vector<vector<int>> game_state){
+    vector<int> best_move = {-1,-1};
+    int best_move_val = -1000;
+    for(int i = 0; i < 3; i++){
+        for(int j = 0; j <3; j++){
+            if(game_state[i][j] == 0){
+                game_state[i][j] = 2;
+                int move_val = minimax(game_state, 0, false);
+                game_state[i][j] = 0;
+                if(move_val > best_move_val){
+                    best_move[0] = i;
+                    best_move[1] = j;
+                    best_move_val = move_val;
+                }
+            }
+        }
+    }
+    return best_move;
 }
 
 
@@ -109,8 +158,12 @@ while(true){
         int row = -1, col = -1;
         vector<int> bot_move= {2,2};
         print_game(game_state);
-        if(check_win(game_state) != 0){
-            cout << endl << "Winner is: " << convert(check_win(game_state)) << endl << "(c) to reset, (q) to quit: ";
+        if(check_win(game_state) != 0 || moves_left(game_state) == false){
+            if(check_win(game_state) != 0){
+                cout << endl << "Winner is: " << convert(check_win(game_state)) << endl << "(c) to reset, (q) to quit: ";
+            }else{
+                cout << endl << "Stalemate, Nobody wins :(" << endl << "(c) to reset, (q) to quit: ";
+            }
             char input;
             cin >> input;
             if(input == 'c'){
@@ -125,12 +178,12 @@ while(true){
             cin >> row >> col;
             if((1 <= row && row <= 3) && (1 <= col && col <= 3)){
                 if(valid_move(game_state, row-1, col-1)){
-                    add_move(game_state, row-1, col-1, 1);
+                    game_state[row-1][col-1] = 1;
+                    break;
                 }else{
                     cout << "invalid Move, Try Again\n";
                     continue;
                 }
-                break;
             }else{
                 cout << "Invalid Input, Try Again\n";
                 cin.clear();
@@ -138,9 +191,9 @@ while(true){
                 continue; 
             }
         }
-        if(check_win(game_state) == 0){
-            bot_move_decide(game_state, bot_move);
-            bot_make_move(game_state, bot_move);
+        if(check_win(game_state) == 0 && moves_left(game_state)==true){
+            bot_move = find_best_move(game_state);
+            add_move(game_state, bot_move);
         }
 }
 return 0; 
